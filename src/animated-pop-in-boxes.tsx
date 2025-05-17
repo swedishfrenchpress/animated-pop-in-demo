@@ -40,7 +40,6 @@ export function AnimatedPopInBoxes({ children, ...rest }: { children: ReactNode[
               animate={{ y: 0, scale: 1, opacity: 1 }}
               exit={{ y: -100, scale: 0.75, opacity: 0 }}
               transition={prefersReducedMotion ? { duration: 0.25 } : springTransition}
-              style={{ zIndex: 2 }}  // Always keep selected item on top
             >
               {selected}
             </MotionBox>
