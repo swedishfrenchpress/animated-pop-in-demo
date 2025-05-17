@@ -57,7 +57,7 @@ export function AnimatedPopInBoxes({ children, ...rest }: { children: ReactNode[
                 hidden: { opacity: 0, scale: 1 },
                 visible: {
                   opacity: 1,
-                  scale: selectedIndex !== null ? 0.75 : 1,
+                  scale: selectedIndex !== null ? 0.65 : 1,
                   transition: { duration: 0.05 },
                 },
               }}
