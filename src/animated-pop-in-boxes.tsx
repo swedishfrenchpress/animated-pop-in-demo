@@ -63,7 +63,7 @@ export function AnimatedPopInBoxes({ children, ...rest }: { children: ReactNode[
         style={{ zIndex: 1 }}
         mt={selectedIndex !== null ? 8 : 0}
       >
-        <HStack wrap="wrap" justify="center" spacing={selectedIndex !== null ? 4 : 4}>
+        <HStack wrap="wrap" justify="center" spacing={selectedIndex !== null ? 0 : 4}>
           {others.map(({ child, index }) => (
             <MotionBox
               key={`box-${index}`}
