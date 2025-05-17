@@ -21,10 +21,15 @@ export function AnimatedPopInBoxes({ children, ...rest }: { children: ReactNode[
             key={`selected-${selectedIndex}`}
             as={motion.div}
             layoutId={`item-${selectedIndex}`}
-            initial={{ y: 100, scale: 0.75, opacity: 0 }}
-            animate={{ y: 0, scale: 1, opacity: 1 }}
-            exit={{ y: -100, scale: 0.75, opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            initial={{ y: 100, scale: 0.75, opacity: 0, rotate: -2 }}
+            animate={{ y: 0, scale: 1, opacity: 1, rotate: 0 }}
+            exit={{ y: -100, scale: 0.75, opacity: 0, rotate: 2 }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 20,
+              opacity: { duration: 0.2, ease: "easeInOut" }
+            }}
           >
             {selected}
           </MotionBox>
@@ -38,6 +43,7 @@ export function AnimatedPopInBoxes({ children, ...rest }: { children: ReactNode[
           visible: {
             transition: {
               staggerChildren: 0.5,
+              delayChildren: 0.1,
             },
           },
         }}
@@ -54,12 +60,22 @@ export function AnimatedPopInBoxes({ children, ...rest }: { children: ReactNode[
               initial="hidden"
               animate="visible"
               variants={{
-                hidden: { opacity: 0, scale: 1 },
+                hidden: { opacity: 0, scale: 0.8, y: 20 },
                 visible: {
                   opacity: 1,
-                  scale: selectedIndex !== null ? 0.75 : 1,
-                  transition: { duration: 0.05 },
+                  scale: selectedIndex !== null ? 0.65 : 1,
+                  y: 0,
+                  transition: { 
+                    type: "spring", 
+                    stiffness: 400, 
+                    damping: 15,
+                    opacity: { duration: 0.15, ease: "easeOut" }
+                  },
                 },
+              }}
+              whileHover={{
+                scale: selectedIndex !== null ? 0.7 : 1.05,
+                transition: { duration: 0.2, ease: "easeOut" }
               }}
             >
               {child}
@@ -76,21 +92,31 @@ export function AnimatedPopInSingleBox({ children, ...rest }: { children: ReactN
     <AnimatePresence>
       <Box
         as={motion.div}
-        initial={{ y: 200, scale: 0.8 }}
+        initial={{ y: 200, scale: 0.8, opacity: 0 }}
         animate={{
           y: 0,
           scale: 1,
+          opacity: 1,
           transition: {
-            y: { duration: 0.5, ease: 'easeOut' },
-            scale: { duration: 0.5, ease: 'easeOut' },
+            type: "spring",
+            damping: 12,
+            stiffness: 200,
+            mass: 0.8,
+            opacity: { 
+              duration: 0.3, 
+              ease: "easeInOut",
+              delay: 0.1
+            }
           },
         }}
         exit={{
-          y: 200,
-          scale: 0.8,
+          y: 100,
+          scale: 0.9,
+          opacity: 0,
           transition: {
-            y: { duration: 0.1, ease: 'easeOut' },
-            scale: { duration: 0.1, ease: 'easeOut' },
+            type: "tween",
+            duration: 0.25,
+            ease: "easeInOut"
           },
         }}
         {...rest}
