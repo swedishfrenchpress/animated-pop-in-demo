@@ -1,11 +1,25 @@
 import { Box, HStack, VStack, type BoxProps } from '@chakra-ui/react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useState, type ReactNode } from 'react'
 
 const MotionBox = motion(Box)
 
+// Animation configs inspired by Sonner toast library
+const springTransition = {
+  type: 'spring',
+  stiffness: 260,
+  damping: 20
+}
+
+const smoothTransition = {
+  type: 'tween',
+  ease: [0.16, 1, 0.3, 1], // Smooth cubic-bezier curve
+  duration: 0.3
+}
+
 export function AnimatedPopInBoxes({ children, ...rest }: { children: ReactNode[] } & BoxProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
+  const prefersReducedMotion = useReducedMotion()
 
   const selected = selectedIndex !== null ? children[selectedIndex] : null
   const others =
@@ -14,22 +28,25 @@ export function AnimatedPopInBoxes({ children, ...rest }: { children: ReactNode[
       : children.map((c, i) => ({ child: c, index: i }))
 
   return (
-    <VStack spacing={6} align="center" {...rest}>
-      <AnimatePresence mode="wait">
-        {selectedIndex !== null && (
-          <MotionBox
-            key={`selected-${selectedIndex}`}
-            as={motion.div}
-            layoutId={`item-${selectedIndex}`}
-            initial={{ y: 100, scale: 0.75, opacity: 0 }}
-            animate={{ y: 0, scale: 1, opacity: 1 }}
-            exit={{ y: -100, scale: 0.75, opacity: 0 }}
-            transition={{ duration: 0.25 }}
-          >
-            {selected}
-          </MotionBox>
-        )}
-      </AnimatePresence>
+    <VStack spacing={selectedIndex !== null ? 8 : 6} align="center" {...rest}>
+      <Box position="relative" width="100%" height={selectedIndex !== null ? "80px" : "0px"} style={{ zIndex: 2 }} display="flex" justifyContent="center">
+        <AnimatePresence>
+          {selectedIndex !== null && (
+            <MotionBox
+              key={`box-${selectedIndex}`}
+              as={motion.div}
+              layoutId={`box-${selectedIndex}`}
+              initial={{ y: 100, scale: 0.75, opacity: 0 }}
+              animate={{ y: 0, scale: 1, opacity: 1 }}
+              exit={{ y: -100, scale: 0.75, opacity: 0 }}
+              transition={prefersReducedMotion ? { duration: 0.25 } : springTransition}
+              style={{ zIndex: 2 }}  // Always keep selected item on top
+            >
+              {selected}
+            </MotionBox>
+          )}
+        </AnimatePresence>
+      </Box>
 
       <MotionBox
         as={motion.div}
@@ -37,18 +54,20 @@ export function AnimatedPopInBoxes({ children, ...rest }: { children: ReactNode[
           hidden: {},
           visible: {
             transition: {
-              staggerChildren: 0.5,
+              staggerChildren: prefersReducedMotion ? 0.5 : 0.05,
             },
           },
         }}
         initial="hidden"
         animate="visible"
+        style={{ zIndex: 1 }}
+        mt={selectedIndex !== null ? 8 : 0}
       >
-        <HStack wrap="wrap" justify="center" spacing={selectedIndex !== null ? 0 : 4}>
+        <HStack wrap="wrap" justify="center" spacing={selectedIndex !== null ? 4 : 4}>
           {others.map(({ child, index }) => (
             <MotionBox
-              key={index}
-              layoutId={`item-${index}`}
+              key={`box-${index}`}
+              layoutId={`box-${index}`}
               cursor="pointer"
               onClick={() => setSelectedIndex(index)}
               initial="hidden"
@@ -58,8 +77,14 @@ export function AnimatedPopInBoxes({ children, ...rest }: { children: ReactNode[
                 visible: {
                   opacity: 1,
                   scale: selectedIndex !== null ? 0.65 : 1,
-                  transition: { duration: 0.05 },
+                  transition: prefersReducedMotion 
+                    ? { duration: 0.05 }
+                    : smoothTransition,
                 },
+              }}
+              whileHover={prefersReducedMotion ? undefined : { 
+                scale: selectedIndex !== null ? 0.67 : 1.02,
+                transition: { type: 'spring', stiffness: 400, damping: 25 }
               }}
             >
               {child}
@@ -72,6 +97,8 @@ export function AnimatedPopInBoxes({ children, ...rest }: { children: ReactNode[
 }
 
 export function AnimatedPopInSingleBox({ children, ...rest }: { children: ReactNode } & BoxProps) {
+  const prefersReducedMotion = useReducedMotion()
+  
   return (
     <AnimatePresence>
       <Box
@@ -80,18 +107,18 @@ export function AnimatedPopInSingleBox({ children, ...rest }: { children: ReactN
         animate={{
           y: 0,
           scale: 1,
-          transition: {
+          transition: prefersReducedMotion ? {
             y: { duration: 0.5, ease: 'easeOut' },
             scale: { duration: 0.5, ease: 'easeOut' },
-          },
+          } : springTransition
         }}
         exit={{
           y: 200,
           scale: 0.8,
-          transition: {
+          transition: prefersReducedMotion ? {
             y: { duration: 0.1, ease: 'easeOut' },
             scale: { duration: 0.1, ease: 'easeOut' },
-          },
+          } : smoothTransition
         }}
         {...rest}
       >
